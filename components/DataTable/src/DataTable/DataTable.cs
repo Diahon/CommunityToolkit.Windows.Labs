@@ -44,6 +44,22 @@ public partial class DataTable : Panel
     public static readonly DependencyProperty ColumnSpacingProperty =
         DependencyProperty.Register(nameof(ColumnSpacing), typeof(double), typeof(DataTable), new PropertyMetadata(0d));
 
+    static Size Size(double width, double height)
+    {
+        width = Math.Max(width, 0);
+        height = Math.Max(height, 0);
+
+        return new(width, height);
+    }
+
+    static Rect Rect(double x, double y, double width, double height)
+    {
+        width = Math.Max(width, 0);
+        height = Math.Max(height, 0);
+
+        return new(x, y, width, height);
+    }
+
     protected override Size MeasureOverride(Size availableSize)
     {
         double fixedWidth = 0;
@@ -77,11 +93,11 @@ public partial class DataTable : Panel
         {
             if (column.CurrentWidth.IsStar)
             {
-                column.Measure(new Size(proportionalAmount * column.CurrentWidth.Value, availableSize.Height));
+                column.Measure(Size(proportionalAmount * column.CurrentWidth.Value, availableSize.Height));
             }
             else if (column.CurrentWidth.IsAbsolute)
             {
-                column.Measure(new Size(column.CurrentWidth.Value, availableSize.Height));
+                column.Measure(Size(column.CurrentWidth.Value, availableSize.Height));
             }
             else
             {
@@ -93,7 +109,7 @@ public partial class DataTable : Panel
                 // then invalidate the child arranges [don't re-measure and cause loop]...)
 
                 // For now, we'll just use the header content as a guideline to see if things work.
-                column.Measure(new Size(availableSize.Width - fixedWidth - autoSized, availableSize.Height));
+                column.Measure(Size(availableSize.Width - fixedWidth - autoSized, availableSize.Height));
 
                 // Keep track of already 'allotted' space, use either the maximum child size (if we know it) or the header content
                 autoSized += Math.Max(column.DesiredSize.Width, column.MaxChildDesiredWidth);
@@ -102,7 +118,7 @@ public partial class DataTable : Panel
             maxHeight = Math.Max(maxHeight, column.DesiredSize.Height);
         }
 
-        return new Size(availableSize.Width, maxHeight);
+        return Size(availableSize.Width, maxHeight);
     }
 
     protected override Size ArrangeOverride(Size finalSize)
@@ -142,18 +158,18 @@ public partial class DataTable : Panel
             if (column.CurrentWidth.IsStar)
             {
                 width = proportionalAmount * column.CurrentWidth.Value;
-                column.Arrange(new Rect(x, 0, width, finalSize.Height));
+                column.Arrange(Rect(x, 0, width, finalSize.Height));
             }
             else if (column.CurrentWidth.IsAbsolute)
             {
                 width = column.CurrentWidth.Value;
-                column.Arrange(new Rect(x, 0, width, finalSize.Height));
+                column.Arrange(Rect(x, 0, width, finalSize.Height));
             }
             else
             {
                 // TODO: We use the comparison of sizes a lot, should we cache in the DataColumn itself?
                 width = Math.Max(column.DesiredSize.Width, column.MaxChildDesiredWidth);
-                column.Arrange(new Rect(x, 0, width, finalSize.Height));
+                column.Arrange(Rect(x, 0, width, finalSize.Height));
             }
 
             x += width + ColumnSpacing;
